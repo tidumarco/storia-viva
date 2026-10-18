@@ -6,13 +6,12 @@ import {
   GenerateResponse,
   Voice
 } from '../models/story.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class StoryService {
   private http = inject(HttpClient);
-
-  // Change this if your backend runs on a different port/host
-  private readonly baseUrl = 'http://localhost:3001';
+  private readonly baseUrl = environment.apiBaseUrl;
 
   generate(request: GenerateRequest): Observable<GenerateResponse> {
     return this.http.post<GenerateResponse>(`${this.baseUrl}/api/generate`, {

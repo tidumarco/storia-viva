@@ -209,8 +209,8 @@ interface VoiceOption {
 
     .remove-btn {
       position: absolute;
-      top: 20px;
-      right: 15px;
+      top: 10px;
+      right: 10px;
       background: transparent;
       border: none;
       color: var(--muted);

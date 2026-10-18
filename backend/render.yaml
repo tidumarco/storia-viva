@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: storia-viva-backend
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TTS_MODE
+        value: eleven
+      - key: ELEVENLABS_API_KEY
+        sync: false   # set this manually in the Render dashboard
