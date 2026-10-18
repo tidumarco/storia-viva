@@ -3,6 +3,8 @@
  * Language priority: Italian (UI strings, default TTS lang = "it")
  */
 
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -16,8 +18,20 @@ app.use(cors());
 app.use(express.json({ limit: "2mb" })); // stories can be long
 app.use(express.urlencoded({ extended: true }));
 
-// Serve generated audio files
-app.use("/audio", express.static(path.join(__dirname, "public")));
+// Serve generated audio files with explicit CORS + correct headers
+app.use("/audio", (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Range, Content-Type");
+  res.header("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+}, express.static(path.join(__dirname, "public"), {
+  setHeaders: (res) => {
+    res.set("Accept-Ranges", "bytes");
+    res.set("Cache-Control", "public, max-age=3600");
+  }
+}));
 
 // ---------- Routes ----------
 app.get("/health", (_req, res) => {

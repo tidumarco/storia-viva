@@ -54,6 +54,7 @@ router.post("/generate", async (req, res, next) => {
 
     // 1. Parse free text → structured turns
     const turns = parseStoryToTurns(text);
+    const voiceMap = parseStoryToTurns.lastVoiceMap || {};
 
     if (turns.length === 0) {
       return res.status(400).json({
@@ -61,8 +62,8 @@ router.post("/generate", async (req, res, next) => {
       });
     }
 
-    // 2. Resolve speakers (user overrides + defaults)
-    const speakers = buildSpeakers(turns, userSpeakers);
+    // 2. Resolve speakers (voice declarations + user overrides + defaults)
+    const speakers = buildSpeakers(turns, userSpeakers, voiceMap);
 
     // 3. Generate audio (mock or real)
     const { audioUrl, durationEstimate, mode } = await generateMultiSpeech({
@@ -93,9 +94,38 @@ router.post("/generate", async (req, res, next) => {
 });
 
 /**
- * GET /api/voices
- * Returns the list of available voices (static for now)
+ * GET /api/eleven-voices
+ * Lists the voices available on the connected ElevenLabs account
  */
+router.get("/eleven-voices", async (_req, res) => {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  if (!apiKey) {
+    return res.status(400).json({ error: "ELEVENLABS_API_KEY not set" });
+  }
+
+  try {
+    const response = await fetch("https://api.elevenlabs.io/v1/voices", {
+      headers: { "xi-api-key": apiKey }
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      return res.status(response.status).json({ error: text });
+    }
+
+    const data = await response.json();
+    const voices = (data.voices || []).map(v => ({
+      voice_id: v.voice_id,
+      name: v.name,
+      category: v.category,
+      labels: v.labels
+    }));
+
+    res.json({ voices });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 router.get("/voices", (_req, res) => {
   res.json({
     voices: [

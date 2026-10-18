@@ -91,13 +91,35 @@ Later: replace with LLM for much better turn detection.
 
 ---
 
-## Environment variables
+## Real TTS (ElevenLabs)
 
-| Variable     | Default | Description                          |
-|--------------|---------|--------------------------------------|
-| `PORT`       | 3001    | Server port                          |
-| `TTS_MODE`   | mock    | `mock` or `real`                     |
-| `TTS_API_KEY`| —       | For real provider (not used yet)     |
+To generate audio from the actual text instead of the demo file:
+
+1. Get an API key from [elevenlabs.io](https://elevenlabs.io)
+2. Create a `.env` file in the `backend/` folder:
+
+```env
+TTS_MODE=eleven
+ELEVENLABS_API_KEY=your_key_here
+```
+
+3. Install dotenv (optional, or just export the variables):
+
+```bash
+npm install dotenv
+```
+
+4. At the top of `server.js` add:
+
+```js
+require("dotenv").config();
+```
+
+5. Restart the backend.
+
+Now every generation will call ElevenLabs and produce a real multi-voice MP3.
+
+**Note:** ElevenLabs charges per character. Short stories are cheap. The code uses `eleven_multilingual_v2` which supports Italian well.
 
 ---
 
